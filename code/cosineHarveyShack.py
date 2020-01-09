@@ -108,23 +108,12 @@ def main():
     Nf = 20
     plt.figure(figsize=(10,5))
 
-    thetai = 20 / 180*pi
-    sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
-    visualize(N, Nf, sk, K, rho, mu)
+    thetailist = [20 / 180*pi]
+    for thetai in thetailist:
+        sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
+        visualize(N, Nf, sk, K, rho, mu)
 
-    thetai = 40 / 180*pi
-    sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
-    visualize(N, Nf, sk, K, rho, mu)
-
-    thetai = 60 / 180*pi
-    sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
-    visualize(N, Nf, sk, K, rho, mu)
-
-    thetai = 70 / 180*pi
-    sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
-    visualize(N, Nf, sk, K, rho, mu)
     plt.show()
-
 
 def main2():
     ############################
