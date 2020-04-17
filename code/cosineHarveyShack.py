@@ -38,7 +38,7 @@ def chs(lam, sigmas, lc, thetai, n1, n2, N, Nf):
                 + 2*rho*sin(thetai)*(cos(phi)))
 
     cosk = cos(multiply(np.arange(Nf), phi))
-    sk = np.zeros((Nf, N))
+    sk = np.zeros((Nf, N), np.float128)
 
     # Setup Hankel transform class
     ht = HankelTransform(Rmax=50, order=0, N=201)
@@ -67,7 +67,7 @@ def chs(lam, sigmas, lc, thetai, n1, n2, N, Nf):
 
     return sk, K, rho, mu
 
-def visualize(N, Nf, sk, K, rho, mu):
+def visualize(N, Nf, sk, K, rho, mu, label=""):
     ############################
     # VISUALIZATION
     Slinepos = 0.5*sk[0] + sum([sk[k]*cos(k*0)
@@ -77,12 +77,15 @@ def visualize(N, Nf, sk, K, rho, mu):
     angles = arcsin(rho)
     angles = np.concatenate([-angles[::-1], angles])
     I = cos(angles) * K*np.concatenate([Slineneg[::-1], Slinepos])
+    if np.isnan(I).sum() > 0:
+        print("Out of range!")
     ax = plt.subplot(1, 2, 1, label='rect')
-    ax.plot(angles/pi*180, I)
+    ax.plot(angles/pi*180, I, label=label)
+    plt.legend()
     ax.set_xlabel('Scattering Angle (Degrees)')
     ax.set_ylabel('Relative Intensity (1/sr)')
-    ax.set_ylim([0,4.5])
-    plt.xlim(-90, 90)
+    ax.set_ylim([0, 4.5])
+    plt.xlim(-92.5, 92.5)
     plt.ylim(0)
 
     phifull = np.linspace(0, 2*pi, 2*N+1)[np.newaxis].T
@@ -93,26 +96,27 @@ def visualize(N, Nf, sk, K, rho, mu):
     ax = plt.subplot(1, 2, 2, projection="polar", aspect=1., label='polar')
     cax = ax.pcolormesh(phifull.ravel(), rho, f.T)
     plt.gcf().colorbar(cax)
+    print(label)
 
 
 def main():
     ############################
     # INPUT PARAMETERS
-    lam = 10.6e-6  # wavelength
     sigmas = 2.27e-6  # rms roughness
     lc = 20.9e-6  # roughness correlation length
     n1 = 1.0
     n2 = -1.0
 
-    N = 1000
+    N = 200
     Nf = 20
+
+    thetailist = [angle / 180*pi for angle in [45]] # , 30, 60, 70]
+    lamlist = np.geomspace(10.6e-6*7, 2.27e-6/20,  10, dtype=np.float128)
     plt.figure(figsize=(10,5))
-
-    thetailist = [20 / 180*pi]
     for thetai in thetailist:
-        sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
-        visualize(N, Nf, sk, K, rho, mu)
-
+        for lam in lamlist:
+            sk, K, rho, mu = chs(lam, sigmas, lc, thetai, n1, n2, N, Nf)
+            visualize(N, Nf, sk, K, rho, mu, "$\lambda$: %.2E, $\sigma_s$: %.2E $l_c$: %.2E" % (lam, sigmas, lc))
     plt.show()
 
 def main2():
